@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+   <!-- iOS  -->
+   <meta name="apple-mobile-web-app-title" content="Application Title">
+   <meta name="apple-mobile-web-app-capable" content="yes">
+   <meta name="apple-mobile-web-app-status-bar-style" content="black">
+ 
+  <link rel="shortcut icon" href="images/icons/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="images/icons/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="images/icons/favicon-32x32.png">
+
+  <!-- iOS  -->
+  <link href="images/icons/apple-touch-icon.png" rel="apple-touch-icon" type="image/png">
+  <link href="images/icons/apple-touch-icon-76x76.png" rel="apple-touch-icon" type="image/png" sizes="76x76">
+  <link href="images/icons/apple-touch-icon-120x120.png" rel="apple-touch-icon" type="image/png" sizes="120x120">
+  <link href="images/icons/apple-touch-icon-152x152.png" rel="apple-touch-icon" type="image/png" sizes="152x152">
+
+  <title> HELLO PWA  </title>
+
+  <link rel="manifest" crossorigin="use-credentials" href="manifest.json">
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('./service_worker.js')
+        .then(function () {
+          console.log('서비스 워커가 등록됨!');
+        })
+    }
+  </script>
+  <style>
+    .hidden {
+        display: none !important;
+    }
+   </style>
+   
+</head>
+<body>
+  <h1>HELLO PWA</h1>
+  <div id="installContainer" class="hidden" >
+    <button id="butInstall" type="button">
+      앱으로 설치
+    </button>
+  </div>
+</body>
+<script src="js/main.js"></script>
+
+<script>
+window.addEventListener('beforeinstallprompt', (event) => {
+  console.log('👍', 'beforeinstallprompt', event);
+  // 나중에 이벤트를 활성화하려고 보관한다.
+  window.deferredPrompt = event;
+  // 설치 버튼에 담긴 hidden 클래스를 제거한다. 
+  divInstall.classList.toggle('hidden', false);
+});
+
+butInstall.addEventListener('click', async () => {
+  console.log('👍', 'butInstall-clicked');
+  const promptEvent = window.deferredPrompt;
+  if (!promptEvent) {
+    // The deferred prompt isn't available.
+    return;
+  }
+  // 설치 prompt 호출!
+  promptEvent.prompt();
+  // 결과물 로깅 및 사용자 선택 저장
+  const result = await promptEvent.userChoice;
+  console.log('👍', 'userChoice', result);
+  // 이벤트 초기화. prompt()는 한번만 호출할 수 있다.
+  window.deferredPrompt = null;
+  // 설치 버튼 다시 숨기기
+  divInstall.classList.toggle('hidden', true);
+
+});
+
+window.addEventListener('appinstalled', (event) => {
+  console.log('👍', 'appinstalled', event);
+  // 이벤트 초기화 (리소스 가비지 처리) 
+  window.deferredPrompt = null;
+});
+
+</script>
+
+</html>
